@@ -22,6 +22,16 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a5bd4e80-e503-4797-ba87-2bb43edaca74"
+      }
+    },
+    "owner": "sarahcodes42",
+    "plugins": [
+      "expo-font",
+      "expo-router"
+    ]
   }
 }
