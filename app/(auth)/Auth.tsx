@@ -22,10 +22,14 @@ export default function Auth() {
 
   async function signInWithEmail() {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
     });
+    // console.log(session);
 
     if (error) Alert.alert(error.message);
     setLoading(false);
@@ -40,6 +44,7 @@ export default function Auth() {
       email: email,
       password: password,
     });
+    console.log(session);
 
     if (error) Alert.alert(error.message);
     if (!session) Alert.alert('Please check your inbox for email verification!');

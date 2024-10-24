@@ -2,23 +2,28 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../utils/client';
 import { StyleSheet, View, Alert } from 'react-native';
 import { Button, Input } from '@rneui/themed';
-import { Session } from '@supabase/supabase-js';
-
-export default function Account({ session }: { session: Session }) {
+import { useAuthContext } from '../../context/AuthProvider';
+import { router } from 'expo-router';
+export default function Account() {
   const [loading, setLoading] = useState(true);
+  const { session, setSession,user, setUser } = useAuthContext();
   const [username, setUsername] = useState('');
   const [website, setWebsite] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
 
   useEffect(() => {
+    console.log('account screen session: ', session);
     if (session) getProfile();
   }, [session]);
 
   async function getProfile() {
+    console.log('getProfile');
     try {
       setLoading(true);
-      if (!session?.user) throw new Error('No user on the session!');
-
+      if (!session?.user) {
+        console.log('no user on the session!');
+        throw new Error('No user on the session!');
+      }
       const { data, error, status } = await supabase
         .from('profiles')
         .select(`username, website, avatar_url`)
@@ -27,6 +32,7 @@ export default function Account({ session }: { session: Session }) {
       if (error && status !== 406) {
         throw error;
       }
+      console.log('data', data);
 
       if (data) {
         setUsername(data.username);
@@ -77,10 +83,17 @@ export default function Account({ session }: { session: Session }) {
     }
   }
 
+  const handleSignOut = () => {
+    supabase.auth.signOut();
+    setSession(null);
+    setUser(null);
+    router.push('/auth');
+  };
+
   return (
     <View style={styles.container}>
       <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Input label='Email' value={session?.user?.email} disabled />
+        <Input label='Email' value={user?.email} disabled />
       </View>
       <View style={styles.verticallySpaced}>
         <Input label='Username' value={username || ''} onChangeText={(text) => setUsername(text)} />
@@ -98,7 +111,7 @@ export default function Account({ session }: { session: Session }) {
       </View>
 
       <View style={styles.verticallySpaced}>
-        <Button title='Sign Out' onPress={() => supabase.auth.signOut()} />
+        <Button title='Sign Out' onPress={handleSignOut} />
       </View>
     </View>
   );

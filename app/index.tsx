@@ -1,22 +1,45 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../utils/client';
-import Auth from './(auth)/Auth';
-import Account from './(auth)/Account';
-import { View } from 'react-native';
+import { SafeAreaView, TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import { Session } from '@supabase/supabase-js';
+import { colors } from '../constants';
+import { Redirect, router } from 'expo-router';
+import { useAuthContext } from '../context/AuthProvider';
 
 export default function App() {
-  const [session, setSession] = useState<Session | null>(null);
+  const { session } = useAuthContext();
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
+  const handlePress = () => {
+    // setIsLoading(true);
+    router.push('/auth');
+  };
 
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-  }, []);
+  if (session) return <Redirect href='/account' />;
 
-  return <View>{session && session.user ? <Account key={session.user.id} session={session} /> : <Auth />}</View>;
+  return (
+    <SafeAreaView>
+      <TouchableOpacity
+        style={[styles.buttonContainer, isLoading && { opacity: 0.5 }]}
+        activeOpacity={0.7}
+        onPress={handlePress}
+        disabled={isLoading}
+      >
+        <Text style={styles.buttonText}>Go to Auth</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
+  );
 }
+
+const styles = StyleSheet.create({
+  buttonContainer: {
+    padding: 10,
+    borderRadius: 5,
+    backgroundColor: colors.brand500,
+  },
+  buttonText: {
+    color: colors.white,
+    fontSize: 16,
+    fontFamily: 'Poppins-Regular',
+  },
+});
